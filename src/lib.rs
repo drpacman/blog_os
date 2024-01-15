@@ -1,6 +1,5 @@
 #![no_std]
 
-
 #![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![feature(abi_x86_interrupt)]
@@ -11,8 +10,10 @@ use core::panic::PanicInfo;
 pub mod serial;
 pub mod vga_buffer;
 pub mod interrupts;
+pub mod gdt;
 
 pub fn init() {
+    gdt::init();
     interrupts::init_idt();
 }
 
@@ -47,14 +48,6 @@ where
     }
 }
 
-pub fn test_runner(tests: &[&dyn Testable]) {
-    serial_println!("Running {} tests", tests.len());
-    for test in tests {
-        test.run();
-    }
-    exit_qemu(QemuExitCode::Success);
-}
-
 // Entry point for cargo test
 #[cfg(test)]
 #[no_mangle]
@@ -62,6 +55,14 @@ pub extern "C" fn _start() -> ! {
 	init();
     test_main();
     loop{}
+}
+
+pub fn test_runner(tests: &[&dyn Testable]) {
+    serial_println!("Running {} tests", tests.len());
+    for test in tests {
+        test.run();
+    }
+    exit_qemu(QemuExitCode::Success);
 }
 
 pub fn test_panic_handler(info: &PanicInfo) -> ! {
@@ -77,4 +78,15 @@ fn panic(info: &PanicInfo) -> ! {
     test_panic_handler(info);
 }
 
-
+// divide by zero helper function to support testing
+pub fn divide_by_zero() {
+    use core::arch::asm;
+    unsafe {
+        asm!(
+            "mov dx, 0",
+            "div dx", 
+            out("dx") _, 
+            out("ax") _
+        );
+    }
+}
