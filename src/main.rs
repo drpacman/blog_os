@@ -5,16 +5,16 @@
 #![reexport_test_harness_main = "test_main"]
 
 use core::panic::PanicInfo;
+
+use blog_os::hlt_loop;
 mod vga_buffer;
 
 /// This function is called on panic.
 #[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
-    use blog_os::{ exit_qemu, QemuExitCode };
     println!("PANIC!!: {}", info);
-    exit_qemu(QemuExitCode::Failed);
-    loop {}
+    blog_os::hlt_loop();
 }
 
 #[cfg(test)]
@@ -31,13 +31,6 @@ pub extern "C" fn _start() -> ! {
     #[cfg(test)]
     test_main();
 
-    fn stack_overflow() {
-        stack_overflow(); // for each recursion, the return address is pushed
-    }
-
-    // trigger a stack overflow
-    stack_overflow();
-
     // // trigger a breakpoint interrupt
     // x86_64::instructions::interrupts::int3();
     // // trigger a divide by zero exception
@@ -47,9 +40,8 @@ pub extern "C" fn _start() -> ! {
     // unsafe {
     //     *(0xdeadbeef as *mut u8) = 42;
     // };
-
-    if true { panic!("Some panic message"); }
-    loop{}
+    println!("It didn't crash");
+    hlt_loop()
 }
 
 

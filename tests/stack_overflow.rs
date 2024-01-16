@@ -5,7 +5,7 @@
 #![feature(abi_x86_interrupt)]
 
 use core::panic::PanicInfo;
-use blog_os::{serial_print, gdt};
+use blog_os::{serial_print, gdt, hlt_loop};
 use lazy_static::lazy_static;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
 
@@ -24,7 +24,7 @@ lazy_static! {
 extern "x86-interrupt" fn test_double_fault_handler(_stack_frame: InterruptStackFrame, _error_code: u64) -> ! {
     serial_print!("[ok]\n");
     blog_os::exit_qemu(blog_os::QemuExitCode::Success);
-    loop {}
+    hlt_loop()
 }
 
 #[panic_handler]
