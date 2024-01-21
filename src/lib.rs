@@ -5,7 +5,8 @@
 #![feature(abi_x86_interrupt)]
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
-
+// to support const fn things in allocator/linked_list.rs
+#![feature(const_mut_refs)]
 #[cfg(test)]
 use bootloader::{BootInfo, entry_point};
 
@@ -15,6 +16,8 @@ pub mod vga_buffer;
 pub mod interrupts;
 pub mod gdt;
 pub mod memory;
+
+pub mod allocator;
 
 pub fn init() {
     gdt::init();

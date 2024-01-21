@@ -1,5 +1,5 @@
 
-use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultHandlerFunc, PageFaultErrorCode};
+use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 use lazy_static::lazy_static;
 use pic8259::ChainedPics;
 use spin;
@@ -75,7 +75,7 @@ extern "x86-interrupt" fn divide_by_zero_handler(stack_frame: InterruptStackFram
 }
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    //print!(".");
+    print!(".");
     unsafe {
         PICS.lock()
             .notify_end_of_interrupt(InterruptIndex::Timer.as_u8());
